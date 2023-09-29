@@ -27,55 +27,55 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  ffi: ^2.0.1
-  path_provider: ^2.0.12
-  external_path: ^1.0.1
-  provider: ^6.0.3
-  tuple: ^2.0.0
-  wakelock: ^0.6.2
+  ffi: 2.0.1
+  path_provider: 2.0.12
+  external_path: 1.0.1
+  provider: 6.0.3
+  tuple: 2.0.0
+  wakelock: 0.6.2
   # Keep this version for the compatibility of some old systems like win7.
-  device_info_plus: ^4.1.2
-  #firebase_analytics: ^9.1.5
-  package_info_plus: ^3.1.2
-  url_launcher: ^6.0.9
-  toggle_switch: ^2.1.0
-  dash_chat_2: 
+  device_info_plus: 4.1.2
+  #firebase_analytics: 9.1.5
+  package_info_plus: 3.1.2
+  url_launcher: 6.0.9
+  toggle_switch: 2.1.0
+  dash_chat_2:
     git:
       url: https://github.com/rustdesk-org/Dash-Chat-2
-  draggable_float_widget: ^0.0.2
-  settings_ui: ^2.0.2
-  flutter_breadcrumb: ^1.0.1
-  http: ^0.13.4
-  qr_code_scanner: ^1.0.0
-  zxing2: ^0.2.0
-  image_picker: ^0.8.5
-  image: ^4.0.17
-  back_button_interceptor: ^6.0.1
-  flutter_rust_bridge: "<1.76.0"
+  draggable_float_widget: 0.0.2
+  settings_ui: 2.0.2
+  flutter_breadcrumb: 1.0.1
+  http: 0.13.4
+  qr_code_scanner: 1.0.0
+  zxing2: 0.2.0
+  image_picker: 0.8.5
+  image: 4.0.17
+  back_button_interceptor: 6.0.1
+  flutter_rust_bridge: 1.75.3
   window_manager:
     git:
       url: https://github.com/rustdesk-org/window_manager
   desktop_multi_window:
     git:
       url: https://github.com/rustdesk-org/rustdesk_desktop_multi_window
-  freezed_annotation: ^2.0.3
-  flutter_custom_cursor: ^0.0.4
+  freezed_annotation: 2.0.3
+  flutter_custom_cursor: 0.0.4
   window_size:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
       path: plugins/window_size
       ref: a738913c8ce2c9f47515382d40827e794a334274
-  get: ^4.6.5
-  visibility_detector: ^0.4.0+2
-  contextmenu: ^3.0.0
-  desktop_drop: 
+  get: 4.6.5
+  visibility_detector: 0.4.0+2
+  contextmenu: 3.0.0
+  desktop_drop:
     git:
       url: https://github.com/rustdesk-org/flutter-plugins
       path: ./packages/desktop_drop
-  scroll_pos: ^0.4.0
-  debounce_throttle: ^2.0.0
-  file_picker: ^5.1.0
-  flutter_svg: ^2.0.5
+  scroll_pos: 0.4.0
+  debounce_throttle: 2.0.0
+  file_picker: 5.1.0
+  flutter_svg: 2.0.5
   flutter_improved_scrolling:
     # currently, we use flutter 3.10.0+.
     #
@@ -83,36 +83,44 @@ dependencies:
     # if build rustdesk by flutter >=3.3, please use our custom pub below (uncomment code below).
     git:
       url: https://github.com/rustdesk-org/flutter_improved_scrolling
-  uni_links: ^0.5.1
-  uni_links_desktop: 
+  uni_links: 0.5.1
+  uni_links_desktop:
     git:
       url: https://github.com/rustdesk-org/uni_links_desktop
-  path: ^1.8.1
-  auto_size_text: ^3.0.0
-  bot_toast: ^4.0.3
+  path: 1.8.1
+  auto_size_text: 3.0.0
+  bot_toast: 4.0.3
   win32: any
-  password_strength: ^0.2.0
-  flutter_launcher_icons: ^0.13.1
-  flutter_keyboard_visibility: ^5.4.0
-  texture_rgba_renderer: ^0.0.16
-  percent_indicator: ^4.2.2
-  dropdown_button2: ^2.0.0
-  uuid: ^3.0.7
-  auto_size_text_field: ^2.2.1
-  flex_color_picker: ^3.3.0
+  password_strength: 0.2.0
+  flutter_launcher_icons: 0.13.1
+  flutter_keyboard_visibility: 5.4.0
+  texture_rgba_renderer: 0.0.16
+  percent_indicator: 4.2.2
+  dropdown_button2: 2.0.0
+  uuid: 3.0.7
+  auto_size_text_field: 2.2.1
+  flex_color_picker: 3.3.0
   dynamic_layouts:
     git:
       url: https://github.com/21pages/dynamic_layouts.git
       ref: 24cb88413fa5181d949ddacbb30a65d5c459e7d9
 
 dev_dependencies:
-  icons_launcher: ^2.0.4
+  icons_launcher: 2.0.4
   #flutter_test:
   #sdk: flutter
-  build_runner: ^2.4.6
-  freezed: ^2.4.2
-  flutter_lints: ^2.0.2
-  ffigen: ^7.2.4
+  build_runner: 2.4.6
+  freezed: 2.4.2
+  flutter_lints: 2.0.2
+  ffigen: 7.2.4
+
+dependency_overrides:
+  freezed_annotation: 2.4.1
+  image: 4.0.17
+  path: 1.8.2
+  cli_util: 0.4.0
+  url_launcher: 6.1.14
+  tuple: 2.0.1
 
 # rerun: flutter pub run flutter_launcher_icons
 flutter_icons:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hbb/mobile/pages/server_page.dart';
 import 'package:flutter_hbb/mobile/pages/settings_page.dart';
 import 'package:get/get.dart';
+
 import '../../common.dart';
 import '../../common/widgets/chat_page.dart';
 import 'connection_page.dart';
@@ -141,7 +142,7 @@ class _HomePageState extends State<HomePage> {
         ],
       );
     }
-    return Text("RustDesk");
+    return Text("Поддержка");
   }
 }
 
@@ -154,7 +155,7 @@ class WebHomePage extends StatelessWidget {
       // backgroundColor: MyTheme.grayBg,
       appBar: AppBar(
         centerTitle: true,
-        title: Text("RustDesk" + (isWeb ? " (Beta) " : "")),
+        title: Text("Поддержка${isWeb ? " (Бета) " : ""}"),
         actions: connectionPage.appBarActions,
       ),
       body: connectionPage,

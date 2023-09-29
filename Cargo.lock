@@ -5178,6 +5178,7 @@ dependencies = [
  "libloading 0.8.0",
  "libpulse-binding",
  "libpulse-simple-binding",
+ "libsodium-sys",
  "mac_address",
  "magnum-opus",
  "mouce",
@@ -5205,6 +5206,7 @@ dependencies = [
  "sha2",
  "shared_memory",
  "shutdown_hooks",
+ "sodium",
  "sys-locale",
  "system_shutdown",
  "tao",
@@ -5683,6 +5685,12 @@ dependencies = [
  "libc",
  "winapi 0.3.9",
 ]
+
+[[package]]
+name = "sodium"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "581e1fe82365d4e3c3c2d810f465bb69aaf8f227af76501451f1dcd4522d71b1"
 
 [[package]]
 name = "sodiumoxide"

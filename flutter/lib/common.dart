@@ -2314,17 +2314,17 @@ int version_cmp(String v1, String v2) {
 String getWindowName({WindowType? overrideType}) {
   switch (overrideType ?? kWindowType) {
     case WindowType.Main:
-      return "RustDesk";
+      return "Поддержка";
     case WindowType.FileTransfer:
-      return "File Transfer - RustDesk";
+      return "Отправка Файлов - Поддержка";
     case WindowType.PortForward:
-      return "Port Forward - RustDesk";
+      return "Переадресация портов - Поддержка";
     case WindowType.RemoteDesktop:
-      return "Remote Desktop - RustDesk";
+      return "Удаленный рабочий стол - Поддержка";
     default:
       break;
   }
-  return "RustDesk";
+  return "Поддержка";
 }
 
 String getWindowNameWithId(String id, {WindowType? overrideType}) {
@@ -2438,7 +2438,7 @@ Future<void> start_service(bool is_start) async {
   }
 }
 
-typedef Future<bool> WhetherUseRemoteBlock();
+typedef WhetherUseRemoteBlock = Future<bool> Function();
 Widget buildRemoteBlock({required Widget child, WhetherUseRemoteBlock? use}) {
   var block = false.obs;
   return Obx(() => MouseRegion(
