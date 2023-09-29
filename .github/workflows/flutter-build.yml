@@ -536,7 +536,7 @@ jobs:
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          nd-versionk: ${{ env.NDK_VERSION }}
+          ndk-version: ${{ env.NDK_VERSION }}
           add-to-path: true
 
       - name: Clone deps
