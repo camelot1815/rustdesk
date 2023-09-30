@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Поддержка</string>
-    <string name="accessibility_service_description">Разрешить другим устройствам управлять вашим телефоном с использованием виртуального касания при установлении совместного использования экрана Поддержки</string>
+    <string name="app_name">Support</string>
+    <string name="accessibility_service_description">Allow other devices to control your phone using virtual touch, when Support screen sharing is established</string>
 </resources>
