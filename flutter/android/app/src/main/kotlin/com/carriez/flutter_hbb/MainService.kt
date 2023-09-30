@@ -1,4 +1,4 @@
-package com.carriez.flutter_hbb
+package com.support.support
 
 /**
  * Capture screen,get video and audio,send to rust.
@@ -45,7 +45,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 
-const val DEFAULT_NOTIFY_TITLE = "RustDesk"
+const val DEFAULT_NOTIFY_TITLE = "Support"
 const val DEFAULT_NOTIFY_TEXT = "Service is running"
 const val DEFAULT_NOTIFY_ID = 1
 const val NOTIFY_ID_OFFSET = 100

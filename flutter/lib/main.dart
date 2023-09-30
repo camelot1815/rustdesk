@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:bot_toast/bot_toast.dart';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_tab_page.dart';
@@ -109,7 +111,7 @@ Future<void> initEnv(String appType) async {
   // for convenience, use global FFI on mobile platform
   // focus on multi-ffi on desktop first
   await initGlobalFFI();
-  // await Firebase.initializeApp();
+  await Firebase.initializeApp();
   _registerEventHandler();
   // Update the system theme.
   updateSystemWindowTheme();
@@ -288,6 +290,7 @@ void _runApp(
   Widget home,
   ThemeMode themeMode,
 ) {
+  final analytics = FirebaseAnalytics.instance;
   final botToastBuilder = BotToastInit();
   runApp(RefreshWrapper(
     builder: (context) => GetMaterialApp(
@@ -305,7 +308,7 @@ void _runApp(
       ],
       supportedLocales: supportedLocales,
       navigatorObservers: [
-        // FirebaseAnalyticsObserver(analytics: analytics),
+        FirebaseAnalyticsObserver(analytics: analytics),
         BotToastNavigatorObserver(),
       ],
       builder: (context, child) {
@@ -381,7 +384,7 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    // final analytics = FirebaseAnalytics.instance;
+    final analytics = FirebaseAnalytics.instance;
     final botToastBuilder = BotToastInit();
     return RefreshWrapper(builder: (context) {
       return MultiProvider(
@@ -413,7 +416,7 @@ class _AppState extends State<App> {
           ],
           supportedLocales: supportedLocales,
           navigatorObservers: [
-            // FirebaseAnalyticsObserver(analytics: analytics),
+            FirebaseAnalyticsObserver(analytics: analytics),
             BotToastNavigatorObserver(),
           ],
           builder: isAndroid

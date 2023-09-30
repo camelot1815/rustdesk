@@ -766,8 +766,8 @@ showInputWarnAlert(FFI ffi) {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(translate("android_input_permission_tip1")),
-          const SizedBox(height: 10),
-          Text(translate("android_input_permission_tip2")),
+          // const SizedBox(height: 10),
+          // Text(translate("android_input_permission_tip2")),
         ],
       ),
       actions: [

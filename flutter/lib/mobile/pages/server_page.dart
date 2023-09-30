@@ -211,11 +211,7 @@ class ServiceNotRunningNotification extends StatelessWidget {
             ElevatedButton.icon(
                 icon: const Icon(Icons.play_arrow),
                 onPressed: () {
-                  if (gFFI.userModel.userName.value.isEmpty && bind.mainGetLocalOption(key: "show-scam-warning") != "N") {
-                    _showScamWarning(context, serverModel);
-                  } else {
-                    serverModel.toggleService();
-                  }
+                  serverModel.toggleService();
                 },
                 label: Text(translate("Start Service")))
           ],
@@ -278,129 +274,133 @@ class _ScamWarningDialogState extends State<ScamWarningDialog> {
 
     return AlertDialog(
       content: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [
-              Color(0xffe242bc),
-              Color(0xfff4727c),
-            ],
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Color(0xffe242bc),
+                Color(0xfff4727c),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20.0),
           ),
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        padding: EdgeInsets.all(25.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          padding: EdgeInsets.all(25.0),
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.warning_amber_sharp,
-                  color: Colors.white,
+                Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_sharp,
+                      color: Colors.white,
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      translate("Warning"),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 10),
+                SizedBox(height: 20),
+                Center(
+                  child: Image.asset(
+                    'assets/scam.png',
+                    width: 180,
+                  ),
+                ),
+                SizedBox(height: 18),
                 Text(
-                  translate("Warning"),
+                  translate("scam_title"),
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 20.0,
+                    fontSize: 22.0,
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: 20),
-            Center(
-              child: Image.asset('assets/scam.png',
-              width: 180,
-              ),
-            ),
-            SizedBox(height: 18),
-            Text(
-              translate("scam_title"),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 22.0,
-              ),
-            ),
-            SizedBox(height: 18),
-            Text(
-              translate("scam_text1")+"\n\n"
-              +translate("scam_text2")+"\n",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+                SizedBox(height: 18),
+                Text(
+                  "${translate("scam_text1")}\n\n${translate("scam_text2")}\n",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                     fontSize: 16.0,
-              ),
-            ),
-            Row(
-              children: <Widget>[
-                Checkbox(
-                  value: show_warning,
-                  onChanged: (value) {
-                    setState((){
-                      show_warning = value!;
-                    });
-                  },
-                ),
-                Text(
-                  translate("Don't show again"),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15.0,
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: isButtonLocked
-                      ? null
-                      : () {
-                          Navigator.of(context).pop();
-                          _serverModel.toggleService();
-                          if (show_warning) {
-                            bind.mainSetLocalOption(key: "show-scam-warning", value: "N");
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.blueAccent,
-                  ),
-                  child: Text(
-                  isButtonLocked ? translate("I Agree")+" (${_countdown}s)" : translate("I Agree"),
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13.0,
+                Row(
+                  children: <Widget>[
+                    Checkbox(
+                      value: show_warning,
+                      onChanged: (value) {
+                        setState(() {
+                          show_warning = value!;
+                        });
+                      },
                     ),
-                  ),
-                ),
-                SizedBox(width: 15),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); 
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.blueAccent,
-                  ),
-                  child: Text(
-                    translate("Decline"),
-                    style: TextStyle(
+                    Text(
+                      translate("Don't show again"),
+                      style: TextStyle(
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 13.0,
+                        fontSize: 15.0,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-    )])),
-    contentPadding: EdgeInsets.all(0.0),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: isButtonLocked
+                          ? null
+                          : () {
+                              Navigator.of(context).pop();
+                              _serverModel.toggleService();
+                              if (show_warning) {
+                                bind.mainSetLocalOption(
+                                    key: "show-scam-warning", value: "N");
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                      ),
+                      child: Text(
+                        isButtonLocked
+                            ? "${translate("I Agree")} (${_countdown}s)"
+                            : translate("I Agree"),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.0,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                      ),
+                      child: Text(
+                        translate("Decline"),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ])),
+      contentPadding: EdgeInsets.all(0.0),
     );
   }
 }
