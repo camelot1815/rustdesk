@@ -1,0 +1,50 @@
+# fly.toml app configuration file generated for rustdesk-relay on 2023-10-05T22:05:34+03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "rustdesk-relay"
+primary_region = "waw"
+
+[processes]
+  hbbr = "/opt/rustdesk/hbbr"
+  hbbs = "/opt/rustdesk/hbbs -r 66.241.125.102"
+
+[[services]]
+  processes = ["hbbs"]
+  internal_port = 21116
+  protocol = "udp"
+  auto_start_machines = true
+  auto_stop_machines = true
+  min_machines_running = 1
+
+  [[services.ports]]
+    port = 21116
+
+[[services]]
+  processes = ["hbbs"]
+  internal_port = 21115
+  protocol = "tcp"
+  auto_start_machines = true
+  auto_stop_machines = true
+  min_machines_running = 1
+
+  [[services.ports]]
+    port = 21115
+  [[services.ports]]
+    port = 21116
+  [[services.ports]]
+    port = 21118
+
+[[services]]
+  processes = ["hbbr"]
+  internal_port = 21117
+  protocol = "tcp"
+  auto_start_machines = true
+  auto_stop_machines = true
+  min_machines_running = 1
+
+  [[services.ports]]
+    port = 21117
+  [[services.ports]]
+    port = 21119
