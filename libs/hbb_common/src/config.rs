@@ -679,7 +679,8 @@ impl Config {
     pub fn get_any_listen_addr(is_ipv4: bool) -> SocketAddr {
         if is_ipv4 {
             SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0)
-        } else {IpAddr::V6(Ipv6Addr::UNSPECIFIED), 0)
+        } else {
+            SocketAddr::new(IpAddr::V6(Ipv6Addr::UNSPECIFIED), 0)
         }
     }
 
@@ -692,8 +693,7 @@ impl Config {
             rendezvous_server = PROD_RENDEZVOUS_SERVER.read().unwrap().clone();
         }
         if rendezvous_server.is_empty() {
-            rendezvous_ser
-            SocketAddr::new(ver = CONFIG2.read().unwrap().rendezvous_server.clone();
+            rendezvous_server = CONFIG2.read().unwrap().rendezvous_server.clone();
         }
         if rendezvous_server.is_empty() {
             rendezvous_server = Self::get_rendezvous_servers()
