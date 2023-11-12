@@ -535,20 +535,20 @@ jobs:
       fail-fast: false
       matrix:
         job:
-          # - {
-          #     arch: aarch64,
-          #     target: aarch64-linux-android,
-          #     os: ubuntu-20.04,
-          #     extra-build-features: "",
-          #     openssl-arch: android-arm64,
-          #   }
-          # - {
-          #     arch: armv7,
-          #     target: armv7-linux-androideabi,
-          #     os: ubuntu-20.04,
-          #     extra-build-features: "",
-          #     openssl-arch: android-arm,
-          #   }
+          - {
+              arch: aarch64,
+              target: aarch64-linux-android,
+              os: ubuntu-20.04,
+              extra-build-features: "",
+              openssl-arch: android-arm64,
+            }
+          - {
+              arch: armv7,
+              target: armv7-linux-androideabi,
+              os: ubuntu-20.04,
+              extra-build-features: "",
+              openssl-arch: android-arm,
+            }
           - {
               arch: x86,
               target: i686-linux-android,
@@ -556,13 +556,13 @@ jobs:
               extra-build-features: "",
               openssl-arch: android-x86,
             }
-          # - {
-          #     arch: x86_64,
-          #     target: x86_64-linux-android,
-          #     os: ubuntu-20.04,
-          #     extra-build-features: "",
-          #     openssl-arch: android-x64,
-          #   }
+          - {
+              arch: x86_64,
+              target: x86_64-linux-android,
+              os: ubuntu-20.04,
+              extra-build-features: "",
+              openssl-arch: android-x64,
+            }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -673,23 +673,25 @@ jobs:
           cargo install cargo-ndk --version ${{ env.CARGO_NDK_VERSION }}
           case ${{ matrix.job.target }} in
             aarch64-linux-android)
+              sudo chmod +x ./flutter/ndk_arm64.sh
               ./flutter/ndk_arm64.sh
               mkdir -p ./flutter/android/app/src/main/jniLibs/arm64-v8a
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/arm64-v8a/librustdesk.so
             ;;
             armv7-linux-androideabi)
+              sudo chmod +x ./flutter/ndk_arm.sh
               ./flutter/ndk_arm.sh
               mkdir -p ./flutter/android/app/src/main/jniLibs/armeabi-v7a
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/armeabi-v7a/librustdesk.so
             ;;
             i686-linux-android)
-              ls -l ./flutter/ndk_x86.sh
               sudo chmod +x ./flutter/ndk_x86.sh
               ./flutter/ndk_x86.sh
               mkdir -p ./flutter/android/app/src/main/jniLibs/x86
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/x86/librustdesk.so
             ;;
             x86_64-linux-android)
+              sudo chmod +x ./flutter/ndk_x64.sh
               ./flutter/ndk_x64.sh
               mkdir -p ./flutter/android/app/src/main/jniLibs/x86_64
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/x86_64/librustdesk.so
@@ -729,8 +731,8 @@ jobs:
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/x86/librustdesk.so
               # build flutter
               pushd flutter
-              flutter build apk --release --target-platform android-x86 --split-per-abi
-              mv build/app/outputs/flutter-apk/app-x86-release.apk ../rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
+              flutter build apk --debug --target-platform android-x86 --split-per-abi
+              mv build/app/outputs/flutter-apk/app-x86-debug.apk ../rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
             ;;
             x86_64-linux-android)
               mkdir -p ./flutter/android/app/src/main/jniLibs/x86_64
