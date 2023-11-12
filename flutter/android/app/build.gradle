@@ -62,7 +62,7 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
         main.proto.srcDirs += '../../../libs/hbb_common/protos'
         main.proto.includes += "message.proto"
-        jniLibs.srcDirs += 'src/main/jniLibs'
+        jniLibs.srcDirs = ['src/main/jniLibs']
     }
 
     compileOptions {
