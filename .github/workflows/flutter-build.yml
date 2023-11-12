@@ -507,19 +507,26 @@ jobs:
       fail-fast: false
       matrix:
         job:
+          # - {
+          #     arch: aarch64,
+          #     target: aarch64-linux-android,
+          #     os: ubuntu-20.04,
+          #     extra-build-features: "",
+          #     openssl-arch: android-arm64,
+          #   }
+          # - {
+          #     arch: armv7,
+          #     target: armv7-linux-androideabi,
+          #     os: ubuntu-20.04,
+          #     extra-build-features: "",
+          #     openssl-arch: android-arm,
+          #   }
           - {
-              arch: aarch64,
-              target: aarch64-linux-android,
+              arch: x86_64,
+              target: x86_64-linux-android,
               os: ubuntu-20.04,
               extra-build-features: "",
-              openssl-arch: android-arm64,
-            }
-          - {
-              arch: armv7,
-              target: armv7-linux-androideabi,
-              os: ubuntu-20.04,
-              extra-build-features: "",
-              openssl-arch: android-arm,
+              openssl-arch: android-x64,
             }
     steps:
       - name: Install dependencies

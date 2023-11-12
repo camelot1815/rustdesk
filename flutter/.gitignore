@@ -38,7 +38,7 @@ lib/generated_plugin_registrant.dart
 app.*.symbols
 # Obfuscation related
 app.*.map.json
-jniLibs
+jniLibs*
 .vscode
 
 # flutter rust bridge
