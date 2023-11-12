@@ -93,7 +93,7 @@ Future<void> main(List<String> args) async {
     debugPrint("--cm started");
     desktopType = DesktopType.cm;
     await windowManager.ensureInitialized();
-    runConnectionManagerScreen(args.contains('--hide'));
+    runConnectionManagerScreen();
   } else if (args.contains('--install')) {
     runInstallPage();
   } else {
@@ -158,6 +158,7 @@ void runMobileApp() async {
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
   runApp(App());
+  await initUniLinks();
 }
 
 void runMultiWindow(
@@ -200,8 +201,16 @@ void runMultiWindow(
   }
   switch (appType) {
     case kAppTypeDesktopRemote:
-      await restoreWindowPosition(WindowType.RemoteDesktop,
-          windowId: kWindowId!, peerId: argument['id'] as String?);
+      // If screen rect is set, the window will be moved to the target screen and then set fullscreen.
+      if (argument['screen_rect'] == null) {
+        // display can be used to control the offset of the window.
+        await restoreWindowPosition(
+          WindowType.RemoteDesktop,
+          windowId: kWindowId!,
+          peerId: argument['id'] as String?,
+          display: argument['display'] as int?,
+        );
+      }
       break;
     case kAppTypeDesktopFileTransfer:
       await restoreWindowPosition(WindowType.FileTransfer,
@@ -218,13 +227,14 @@ void runMultiWindow(
   WindowController.fromWindowId(kWindowId!).show();
 }
 
-void runConnectionManagerScreen(bool hide) async {
+void runConnectionManagerScreen() async {
   await initEnv(kAppTypeConnectionManager);
   _runApp(
     '',
     const DesktopServerPage(),
     MyTheme.currentThemeMode(),
   );
+  final hide = await bind.cmGetConfig(name: "hide_cm") == 'true';
   gFFI.serverModel.hideCm = hide;
   if (hide) {
     await hideCmWindow(isStartup: true);
@@ -290,8 +300,8 @@ void _runApp(
   Widget home,
   ThemeMode themeMode,
 ) {
-  final analytics = FirebaseAnalytics.instance;
   final botToastBuilder = BotToastInit();
+  final analytics = FirebaseAnalytics.instance;
   runApp(RefreshWrapper(
     builder: (context) => GetMaterialApp(
       navigatorKey: globalKey,

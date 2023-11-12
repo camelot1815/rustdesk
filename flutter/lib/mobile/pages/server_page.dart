@@ -211,9 +211,13 @@ class ServiceNotRunningNotification extends StatelessWidget {
             ElevatedButton.icon(
                 icon: const Icon(Icons.play_arrow),
                 onPressed: () {
+                  // if (gFFI.userModel.userName.value.isEmpty && bind.mainGetLocalOption(key: "show-scam-warning") != "N") {
+                  //   _showScamWarning(context, serverModel);
+                  // } else {
                   serverModel.toggleService();
+                  // }
                 },
-                label: Text(translate("Start Service")))
+                label: Text(translate("Start service")))
           ],
         ));
   }
@@ -325,12 +329,19 @@ class _ScamWarningDialogState extends State<ScamWarningDialog> {
                   ),
                 ),
                 SizedBox(height: 18),
-                Text(
-                  "${translate("scam_text1")}\n\n${translate("scam_text2")}\n",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
+                SizedBox(
+                  height: 220,
+                  child: Scrollbar(
+                    child: SingleChildScrollView(
+                      child: Text(
+                        "${translate("scam_text1")}\n\n${translate("scam_text2")}\n",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 Row(
@@ -357,43 +368,53 @@ class _ScamWarningDialogState extends State<ScamWarningDialog> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    ElevatedButton(
-                      onPressed: isButtonLocked
-                          ? null
-                          : () {
-                              Navigator.of(context).pop();
-                              _serverModel.toggleService();
-                              if (show_warning) {
-                                bind.mainSetLocalOption(
-                                    key: "show-scam-warning", value: "N");
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                      ),
-                      child: Text(
-                        isButtonLocked
-                            ? "${translate("I Agree")} (${_countdown}s)"
-                            : translate("I Agree"),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13.0,
+                    Container(
+                      constraints: BoxConstraints(maxWidth: 150),
+                      child: ElevatedButton(
+                        onPressed: isButtonLocked
+                            ? null
+                            : () {
+                                Navigator.of(context).pop();
+                                _serverModel.toggleService();
+                                if (show_warning) {
+                                  bind.mainSetLocalOption(
+                                      key: "show-scam-warning", value: "N");
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                        child: Text(
+                          isButtonLocked
+                              ? "${translate("I Agree")} (${_countdown}s)"
+                              : translate("I Agree"),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13.0,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
                     SizedBox(width: 15),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                      ),
-                      child: Text(
-                        translate("Decline"),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13.0,
+                    Container(
+                      constraints: BoxConstraints(maxWidth: 150),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                        child: Text(
+                          translate("Decline"),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13.0,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
@@ -544,7 +565,7 @@ class _PermissionCheckerState extends State<PermissionChecker> {
               serverModel.toggleService),
           PermissionRow(translate("Input Control"), serverModel.inputOk,
               serverModel.toggleInput),
-          PermissionRow(translate("Transfer File"), serverModel.fileOk,
+          PermissionRow(translate("Transfer file"), serverModel.fileOk,
               serverModel.toggleFile),
           hasAudioPermission
               ? PermissionRow(translate("Audio Capture"), serverModel.audioOk,

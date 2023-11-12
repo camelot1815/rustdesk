@@ -3,8 +3,8 @@ use protobuf::Message;
 use std::{net::SocketAddr, sync::Arc};
 use tokio::{self, stream::StreamExt, sync::mpsc};
 
-const QUIC_HBB: &[&[u8]] = &[b"hbb"];
-const SERVER_NAME: &str = "hbb";
+const QUIC_HBB: &[&[u8]] = &[b"support"];
+const SERVER_NAME: &str = "support";
 
 type Sender = mpsc::UnboundedSender<Value>;
 type Receiver = mpsc::UnboundedReceiver<Value>;

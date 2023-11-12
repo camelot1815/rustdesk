@@ -1,19 +1,16 @@
-use crate::input::{MOUSE_BUTTON_LEFT, MOUSE_TYPE_DOWN, MOUSE_TYPE_UP, MOUSE_TYPE_WHEEL};
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
-use std::{collections::HashMap, sync::atomic::AtomicBool};
-use std::{
-    ops::{Deref, DerefMut},
-    str::FromStr,
-    sync::{
-        atomic::{AtomicUsize, Ordering},
-        Arc, Mutex, RwLock,
-    },
-    time::SystemTime,
-};
-
+use crate::{input::{MOUSE_BUTTON_LEFT, MOUSE_TYPE_DOWN, MOUSE_TYPE_UP, MOUSE_TYPE_WHEEL}, common::{is_keyboard_mode_supported, get_supported_keyboard_modes}};
 use async_trait::async_trait;
 use bytes::Bytes;
 use rdev::{Event, EventType::*, KeyCode};
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::{
+    collections::HashMap,
+    ops::{Deref, DerefMut},
+    str::FromStr,
+    sync::{Arc, Mutex, RwLock},
+    time::SystemTime,
+};
 use uuid::Uuid;
 
 #[cfg(not(feature = "flutter"))]
@@ -29,14 +26,14 @@ use hbb_common::{
         sync::mpsc,
         time::{Duration as TokioDuration, Instant},
     },
-    SessionID, Stream,
+    Stream,
 };
 
 use crate::client::io_loop::Remote;
 use crate::client::{
     check_if_retry, handle_hash, handle_login_error, handle_login_from_ui, handle_test_delay,
-    input_os_password, load_config, send_mouse, send_pointer_device_event,
-    start_video_audio_threads, FileManager, Key, LoginConfigHandler, QualityStatus, KEY_MAP,
+    input_os_password, send_mouse, send_pointer_device_event, start_video_audio_threads,
+    FileManager, Key, LoginConfigHandler, QualityStatus, KEY_MAP,
 };
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::common::GrabState;
@@ -50,8 +47,6 @@ const CHANGE_RESOLUTION_VALID_TIMEOUT_SECS: u64 = 15;
 
 #[derive(Clone, Default)]
 pub struct Session<T: InvokeUiSession> {
-    pub session_id: SessionID, // different from the one in LoginConfigHandler, used for flutter UI message pass
-    pub id: String,            // peer id
     pub password: String,
     pub args: Vec<String>,
     pub lc: Arc<RwLock<LoginConfigHandler>>,
@@ -62,6 +57,7 @@ pub struct Session<T: InvokeUiSession> {
     pub server_file_transfer_enabled: Arc<RwLock<bool>>,
     pub server_clipboard_enabled: Arc<RwLock<bool>>,
     pub last_change_display: Arc<Mutex<ChangeDisplayRecord>>,
+    pub connection_round_state: Arc<Mutex<ConnectionRoundState>>,
 }
 
 #[derive(Clone)]
@@ -77,6 +73,56 @@ pub struct ChangeDisplayRecord {
     display: i32,
     width: i32,
     height: i32,
+}
+
+enum ConnectionState {
+    Connecting,
+    Connected,
+    Disconnected,
+}
+
+/// ConnectionRoundState is used to control the reconnecting logic.
+pub struct ConnectionRoundState {
+    round: u32,
+    state: ConnectionState,
+}
+
+impl ConnectionRoundState {
+    pub fn new_round(&mut self) -> u32 {
+        self.round += 1;
+        self.state = ConnectionState::Connecting;
+        self.round
+    }
+
+    pub fn set_connected(&mut self) {
+        self.state = ConnectionState::Connected;
+    }
+
+    pub fn is_round_gt(&self, round: u32) -> bool {
+        if round == u32::MAX && self.round == 0 {
+            true
+        } else {
+            round < self.round
+        }
+    }
+
+    pub fn set_disconnected(&mut self, round: u32) -> bool {
+        if self.is_round_gt(round) {
+            false
+        } else {
+            self.state = ConnectionState::Disconnected;
+            true
+        }
+    }
+}
+
+impl Default for ConnectionRoundState {
+    fn default() -> Self {
+        Self {
+            round: 0,
+            state: ConnectionState::Connecting,
+        }
+    }
 }
 
 impl Default for ChangeDisplayRecord {
@@ -167,21 +213,39 @@ impl<T: InvokeUiSession> Session<T> {
         self.lc.read().unwrap().version.clone()
     }
 
-    pub fn get_keyboard_mode(&self) -> String {
-        let mode = self.lc.read().unwrap().keyboard_mode.clone();
-        if ["map", "translate", "legacy"].contains(&(&mode as &str)) {
-            mode
+    pub fn fallback_keyboard_mode(&self) -> String { 
+        let peer_version = self.get_peer_version();
+        let platform = self.peer_platform();
+
+        let supported_modes = get_supported_keyboard_modes(peer_version, &platform);
+        if let Some(mode) = supported_modes.first() {
+            return mode.to_string();
         } else {
-            if self.get_peer_version() > hbb_common::get_version_number("1.2.0") {
-                "map"
+            if self.get_peer_version() >= get_version_number("1.2.0") {
+                return KeyboardMode::Map.to_string();
             } else {
-                "legacy"
+                return KeyboardMode::Legacy.to_string();
             }
-            .to_string()
         }
     }
 
-    pub fn save_keyboard_mode(&mut self, value: String) {
+    pub fn get_keyboard_mode(&self) -> String {
+        let mode = self.lc.read().unwrap().keyboard_mode.clone();
+        let keyboard_mode = KeyboardMode::from_str(&mode);
+
+        let peer_version = self.get_peer_version();
+        let platform = self.peer_platform();
+
+        // Saved keyboard mode still exists in this version.
+        if let Ok(mode) = keyboard_mode {
+            if is_keyboard_mode_supported(&mode, peer_version, &platform) {
+                return mode.to_string();
+            }
+        }
+        self.fallback_keyboard_mode()
+    }
+
+    pub fn save_keyboard_mode(&self, value: String) {
         self.lc.write().unwrap().save_keyboard_mode(value);
     }
 
@@ -189,19 +253,49 @@ impl<T: InvokeUiSession> Session<T> {
         self.lc.read().unwrap().reverse_mouse_wheel.clone()
     }
 
-    pub fn save_reverse_mouse_wheel(&mut self, value: String) {
+    pub fn get_displays_as_individual_windows(&self) -> String {
+        self.lc
+            .read()
+            .unwrap()
+            .displays_as_individual_windows
+            .clone()
+    }
+
+    pub fn get_use_all_my_displays_for_the_remote_session(&self) -> String {
+        self.lc
+            .read()
+            .unwrap()
+            .use_all_my_displays_for_the_remote_session
+            .clone()
+    }
+
+    pub fn save_reverse_mouse_wheel(&self, value: String) {
         self.lc.write().unwrap().save_reverse_mouse_wheel(value);
     }
 
-    pub fn save_view_style(&mut self, value: String) {
+    pub fn save_displays_as_individual_windows(&self, value: String) {
+        self.lc
+            .write()
+            .unwrap()
+            .save_displays_as_individual_windows(value);
+    }
+
+    pub fn save_use_all_my_displays_for_the_remote_session(&self, value: String) {
+        self.lc
+            .write()
+            .unwrap()
+            .save_use_all_my_displays_for_the_remote_session(value);
+    }
+
+    pub fn save_view_style(&self, value: String) {
         self.lc.write().unwrap().save_view_style(value);
     }
 
-    pub fn save_scroll_style(&mut self, value: String) {
+    pub fn save_scroll_style(&self, value: String) {
         self.lc.write().unwrap().save_scroll_style(value);
     }
 
-    pub fn save_flutter_option(&mut self, k: String, v: String) {
+    pub fn save_flutter_option(&self, k: String, v: String) {
         self.lc.write().unwrap().save_ui_flutter(k, v);
     }
 
@@ -209,7 +303,7 @@ impl<T: InvokeUiSession> Session<T> {
         self.lc.read().unwrap().get_ui_flutter(&k)
     }
 
-    pub fn toggle_option(&mut self, name: String) {
+    pub fn toggle_option(&self, name: String) {
         let msg = self.lc.write().unwrap().toggle_option(name.clone());
         #[cfg(not(feature = "flutter"))]
         if name == "enable-file-transfer" {
@@ -236,12 +330,42 @@ impl<T: InvokeUiSession> Session<T> {
             && !self.lc.read().unwrap().disable_clipboard.v
     }
 
-    pub fn refresh_video(&self) {
+    #[cfg(feature = "flutter")]
+    pub fn refresh_video(&self, display: i32) {
+        if crate::common::is_support_multi_ui_session_num(self.lc.read().unwrap().version) {
+            self.send(Data::Message(LoginConfigHandler::refresh_display(
+                display as _,
+            )));
+        } else {
+            self.send(Data::Message(LoginConfigHandler::refresh()));
+        }
+    }
+
+    pub fn toggle_virtual_display(&self, index: i32, on: bool) {
+        let mut misc = Misc::new();
+        misc.set_toggle_virtual_display(ToggleVirtualDisplay {
+            display: index,
+            on,
+            ..Default::default()
+        });
+        let mut msg_out = Message::new();
+        msg_out.set_misc(misc);
+        self.send(Data::Message(msg_out));
+    }
+
+    #[cfg(not(feature = "flutter"))]
+    pub fn refresh_video(&self, _display: i32) {
         self.send(Data::Message(LoginConfigHandler::refresh()));
     }
 
-    pub fn record_screen(&self, start: bool, w: i32, h: i32) {
-        self.send(Data::RecordScreen(start, w, h, self.id.clone()));
+    pub fn record_screen(&self, start: bool, display: i32, w: i32, h: i32) {
+        self.send(Data::RecordScreen(
+            start,
+            display as usize,
+            w,
+            h,
+            self.get_id(),
+        ));
     }
 
     pub fn record_status(&self, status: bool) {
@@ -252,7 +376,7 @@ impl<T: InvokeUiSession> Session<T> {
         self.send(Data::Message(msg));
     }
 
-    pub fn save_custom_image_quality(&mut self, custom_image_quality: i32) {
+    pub fn save_custom_image_quality(&self, custom_image_quality: i32) {
         let msg = self
             .lc
             .write()
@@ -261,14 +385,14 @@ impl<T: InvokeUiSession> Session<T> {
         self.send(Data::Message(msg));
     }
 
-    pub fn save_image_quality(&mut self, value: String) {
+    pub fn save_image_quality(&self, value: String) {
         let msg = self.lc.write().unwrap().save_image_quality(value);
         if let Some(msg) = msg {
             self.send(Data::Message(msg));
         }
     }
 
-    pub fn set_custom_fps(&mut self, custom_fps: i32) {
+    pub fn set_custom_fps(&self, custom_fps: i32) {
         let msg = self.lc.write().unwrap().set_custom_fps(custom_fps);
         self.send(Data::Message(msg));
     }
@@ -345,7 +469,7 @@ impl<T: InvokeUiSession> Session<T> {
 
     pub fn send_note(&self, note: String) {
         let url = self.get_audit_server("conn".to_string());
-        let id = self.id.clone();
+        let id = self.get_id();
         let session_id = self.lc.read().unwrap().session_id;
         std::thread::spawn(move || {
             send_note(url, id, session_id, note);
@@ -372,7 +496,7 @@ impl<T: InvokeUiSession> Session<T> {
         self.send(Data::RemovePortForward(port));
     }
 
-    pub fn add_port_forward(&mut self, port: i32, remote_host: String, remote_port: i32) {
+    pub fn add_port_forward(&self, port: i32, remote_host: String, remote_port: i32) {
         let mut config = self.load_config();
         if config
             .port_forwards
@@ -387,11 +511,6 @@ impl<T: InvokeUiSession> Session<T> {
         config.port_forwards.push(pf.clone());
         self.save_config(config);
         self.send(Data::AddPortForward(pf));
-    }
-
-    #[cfg(not(feature = "flutter"))]
-    pub fn get_id(&self) -> String {
-        self.id.clone()
     }
 
     pub fn get_option(&self, k: String) -> String {
@@ -411,7 +530,7 @@ impl<T: InvokeUiSession> Session<T> {
 
     #[inline]
     pub fn load_config(&self) -> PeerConfig {
-        load_config(&self.id)
+        self.lc.read().unwrap().load_config()
     }
 
     #[inline]
@@ -546,6 +665,19 @@ impl<T: InvokeUiSession> Session<T> {
         let mut misc = Misc::new();
         misc.set_chat_message(ChatMessage {
             text,
+            ..Default::default()
+        });
+        let mut msg_out = Message::new();
+        msg_out.set_misc(misc);
+        self.send(Data::Message(msg_out));
+    }
+
+    pub fn capture_displays(&self, add: Vec<i32>, sub: Vec<i32>, set: Vec<i32>) {
+        let mut misc = Misc::new();
+        misc.set_capture_displays(CaptureDisplays {
+            add,
+            sub,
+            set,
             ..Default::default()
         });
         let mut msg_out = Message::new();
@@ -833,16 +965,30 @@ impl<T: InvokeUiSession> Session<T> {
     }
 
     pub fn reconnect(&self, force_relay: bool) {
-        self.send(Data::Close);
+        // 1. If current session is connecting, do not reconnect.
+        // 2. If the connection is established, send `Data::Close`.
+        // 3. If the connection is disconnected, do nothing.
+        let mut connection_round_state_lock = self.connection_round_state.lock().unwrap();
+        if self.thread.lock().unwrap().is_some() {
+            match connection_round_state_lock.state {
+                ConnectionState::Connecting => return,
+                ConnectionState::Connected => self.send(Data::Close),
+                ConnectionState::Disconnected => {}
+            }
+        }
+        let round = connection_round_state_lock.new_round();
+        drop(connection_round_state_lock);
+
         let cloned = self.clone();
         // override only if true
         if true == force_relay {
-            cloned.lc.write().unwrap().force_relay = true;
+            self.lc.write().unwrap().force_relay = true;
         }
         let mut lock = self.thread.lock().unwrap();
-        lock.take().map(|t| t.join());
+        // No need to join the previous thread, because it will exit automatically.
+        // And the previous thread will not change important states.
         *lock = Some(std::thread::spawn(move || {
-            io_loop(cloned);
+            io_loop(cloned, round);
         }));
     }
 
@@ -958,7 +1104,7 @@ impl<T: InvokeUiSession> Session<T> {
         match crate::ipc::connect(1000, "").await {
             Ok(mut conn) => {
                 if conn
-                    .send(&crate::ipc::Data::SwitchSidesRequest(self.id.to_string()))
+                    .send(&crate::ipc::Data::SwitchSidesRequest(self.get_id()))
                     .await
                     .is_ok()
                 {
@@ -1067,6 +1213,7 @@ pub trait InvokeUiSession: Send + Sync + Clone + 'static + Sized + Default {
     fn switch_display(&self, display: &SwitchDisplay);
     fn set_peer_info(&self, peer_info: &PeerInfo); // flutter
     fn set_displays(&self, displays: &Vec<DisplayInfo>);
+    fn set_platform_additions(&self, data: &str);
     fn on_connected(&self, conn_type: ConnType);
     fn update_privacy_mode(&self);
     fn set_permission(&self, name: &str, value: bool);
@@ -1100,7 +1247,7 @@ pub trait InvokeUiSession: Send + Sync + Clone + 'static + Sized + Default {
     fn update_block_input_state(&self, on: bool);
     fn job_progress(&self, id: i32, file_num: i32, speed: f64, finished_size: f64);
     fn adapt_size(&self);
-    fn on_rgba(&self, rgba: &mut scrap::ImageRgb);
+    fn on_rgba(&self, display: usize, rgba: &mut scrap::ImageRgb);
     fn msgbox(&self, msgtype: &str, title: &str, text: &str, link: &str, retry: bool);
     #[cfg(any(target_os = "android", target_os = "ios"))]
     fn clipboard(&self, content: String);
@@ -1111,8 +1258,8 @@ pub trait InvokeUiSession: Send + Sync + Clone + 'static + Sized + Default {
     fn on_voice_call_closed(&self, reason: &str);
     fn on_voice_call_waiting(&self);
     fn on_voice_call_incoming(&self);
-    fn get_rgba(&self) -> *const u8;
-    fn next_rgba(&self);
+    fn get_rgba(&self, display: usize) -> *const u8;
+    fn next_rgba(&self, display: usize);
 }
 
 impl<T: InvokeUiSession> Deref for Session<T> {
@@ -1133,7 +1280,7 @@ impl<T: InvokeUiSession> FileManager for Session<T> {}
 
 #[async_trait]
 impl<T: InvokeUiSession> Interface for Session<T> {
-    fn get_login_config_handler(&self) -> Arc<RwLock<LoginConfigHandler>> {
+    fn get_lch(&self) -> Arc<RwLock<LoginConfigHandler>> {
         return self.lc.clone();
     }
 
@@ -1151,11 +1298,11 @@ impl<T: InvokeUiSession> Interface for Session<T> {
         self.ui_handler.msgbox(msgtype, title, text, link, retry);
     }
 
-    fn handle_login_error(&mut self, err: &str) -> bool {
+    fn handle_login_error(&self, err: &str) -> bool {
         handle_login_error(self.lc.clone(), err, self)
     }
 
-    fn handle_peer_info(&mut self, mut pi: PeerInfo) {
+    fn handle_peer_info(&self, mut pi: PeerInfo) {
         log::debug!("handle_peer_info :{:?}", pi);
         pi.username = self.lc.read().unwrap().get_username(&pi);
         if pi.current_display as usize >= pi.displays.len() {
@@ -1173,7 +1320,7 @@ impl<T: InvokeUiSession> Interface for Session<T> {
             if pi.displays.is_empty() {
                 self.lc.write().unwrap().handle_peer_info(&pi);
                 self.update_privacy_mode();
-                self.msgbox("error", "Remote Error", "No Display", "");
+                self.msgbox("error", "Remote Error", "No Displays", "");
                 return;
             }
             self.try_change_init_resolution(pi.current_display);
@@ -1208,7 +1355,7 @@ impl<T: InvokeUiSession> Interface for Session<T> {
         #[cfg(windows)]
         {
             let mut path = std::env::temp_dir();
-            path.push(&self.id);
+            path.push(self.get_id());
             let path = path.with_extension(crate::get_app_name().to_lowercase());
             std::fs::File::create(&path).ok();
             if let Some(path) = path.to_str() {
@@ -1217,12 +1364,12 @@ impl<T: InvokeUiSession> Interface for Session<T> {
         }
     }
 
-    async fn handle_hash(&mut self, pass: &str, hash: Hash, peer: &mut Stream) {
+    async fn handle_hash(&self, pass: &str, hash: Hash, peer: &mut Stream) {
         handle_hash(self.lc.clone(), pass, hash, self, peer).await;
     }
 
     async fn handle_login_from_ui(
-        &mut self,
+        &self,
         os_username: String,
         os_password: String,
         password: String,
@@ -1240,7 +1387,7 @@ impl<T: InvokeUiSession> Interface for Session<T> {
         .await;
     }
 
-    async fn handle_test_delay(&mut self, t: TestDelay, peer: &mut Stream) {
+    async fn handle_test_delay(&self, t: TestDelay, peer: &mut Stream) {
         if !t.from_client {
             self.update_quality_status(QualityStatus {
                 delay: Some(t.last_delay as _),
@@ -1283,9 +1430,15 @@ impl<T: InvokeUiSession> Session<T> {
 }
 
 #[tokio::main(flavor = "current_thread")]
-pub async fn io_loop<T: InvokeUiSession>(handler: Session<T>) {
+pub async fn io_loop<T: InvokeUiSession>(handler: Session<T>, round: u32) {
     // It is ok to call this function multiple times.
-    #[cfg(target_os = "windows")]
+    #[cfg(any(
+        target_os = "windows",
+        all(
+            any(target_os = "linux", target_os = "macos"),
+            feature = "unix-file-copy-paste"
+        )
+    ))]
     if !handler.is_file_transfer() && !handler.is_port_forward() {
         clipboard::ContextSend::enable(true);
     }
@@ -1383,26 +1536,33 @@ pub async fn io_loop<T: InvokeUiSession>(handler: Session<T>) {
         }
         return;
     }
-    let frame_count = Arc::new(AtomicUsize::new(0));
-    let frame_count_cl = frame_count.clone();
+    let frame_count_map: Arc<RwLock<HashMap<usize, usize>>> = Default::default();
+    let frame_count_map_cl = frame_count_map.clone();
     let ui_handler = handler.ui_handler.clone();
-    let (video_sender, audio_sender, video_queue, decode_fps) =
-        start_video_audio_threads(move |data: &mut scrap::ImageRgb| {
-            frame_count_cl.fetch_add(1, Ordering::Relaxed);
-            ui_handler.on_rgba(data);
-        });
+    let (video_sender, audio_sender, video_queue_map, decode_fps_map, chroma) =
+        start_video_audio_threads(
+            handler.clone(),
+            move |display: usize, data: &mut scrap::ImageRgb| {
+                let mut write_lock = frame_count_map_cl.write().unwrap();
+                let count = write_lock.get(&display).unwrap_or(&0) + 1;
+                write_lock.insert(display, count);
+                drop(write_lock);
+                ui_handler.on_rgba(display, data);
+            },
+        );
 
     let mut remote = Remote::new(
         handler,
-        video_queue,
+        video_queue_map,
         video_sender,
         audio_sender,
         receiver,
         sender,
-        frame_count,
-        decode_fps,
+        frame_count_map,
+        decode_fps_map,
+        chroma,
     );
-    remote.io_loop(&key, &token).await;
+    remote.io_loop(&key, &token, round).await;
     remote.sync_jobs_status_to_local().await;
 }
 
@@ -1417,7 +1577,7 @@ async fn start_one_port_forward<T: InvokeUiSession>(
     token: &str,
 ) {
     if let Err(err) = crate::port_forward::listen(
-        handler.id.clone(),
+        handler.get_id(),
         handler.password.clone(),
         port,
         handler.clone(),

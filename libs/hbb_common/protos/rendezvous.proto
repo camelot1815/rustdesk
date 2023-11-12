@@ -1,5 +1,5 @@
 syntax = "proto3";
-package hbb;
+package support;
 
 message RegisterPeer {
   string id = 1;
@@ -15,15 +15,15 @@ enum ConnType {
 
 message RegisterPeerResponse { bool request_pk = 2; }
 
-message PunchHoleRequest { 
-  string id = 1; 
+message PunchHoleRequest {
+  string id = 1;
   NatType nat_type = 2;
   string licence_key = 3;
   ConnType conn_type = 4;
   string token = 5;
 }
 
-message PunchHole { 
+message PunchHole {
   bytes socket_addr = 1;
   string relay_server = 2;
   NatType nat_type = 3;
@@ -36,7 +36,7 @@ message TestNatRequest {
 
 // per my test, uint/int has no difference in encoding, int not good for negative, use sint for negative
 message TestNatResponse {
-  int32 port = 1; 
+  int32 port = 1;
   ConfigUpdate cu = 2; // for mobile
 }
 
@@ -129,8 +129,8 @@ message SoftwareUpdate { string url = 1; }
 // even some router has below connection error if we connect itself,
 //  { kind: Other, error: "could not resolve to any address" },
 // so we request local address to connect.
-message FetchLocalAddr { 
-  bytes socket_addr = 1; 
+message FetchLocalAddr {
+  bytes socket_addr = 1;
   string relay_server = 2;
   string request_region = 3;
 }
@@ -164,7 +164,7 @@ message OnlineResponse {
 }
 
 message KeyExchange {
-  repeated bytes keys = 1; 
+  repeated bytes keys = 1;
 }
 
 message RendezvousMessage {

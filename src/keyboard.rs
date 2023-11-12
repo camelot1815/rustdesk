@@ -1,5 +1,5 @@
 #[cfg(feature = "flutter")]
-use crate::flutter::{CUR_SESSION_ID, SESSIONS};
+use crate::flutter;
 #[cfg(target_os = "windows")]
 use crate::platform::windows::{get_char_from_vk, get_unicode_from_vk};
 #[cfg(not(any(feature = "flutter", feature = "cli")))]
@@ -28,6 +28,8 @@ const OS_LOWER_WINDOWS: &str = "windows";
 const OS_LOWER_LINUX: &str = "linux";
 #[allow(dead_code)]
 const OS_LOWER_MACOS: &str = "macos";
+#[allow(dead_code)]
+const OS_LOWER_ANDROID: &str = "android";
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 static KEYBOARD_HOOKED: AtomicBool = AtomicBool::new(false);
@@ -163,6 +165,21 @@ pub mod client {
         }
     }
 
+    pub fn map_key_to_control_key(key: &rdev::Key) -> Option<ControlKey> {
+        match key {
+            Key::Alt => Some(ControlKey::Alt),
+            Key::ShiftLeft => Some(ControlKey::Shift),
+            Key::ControlLeft => Some(ControlKey::Control),
+            Key::MetaLeft => Some(ControlKey::Meta),
+            Key::AltGr => Some(ControlKey::RAlt),
+            Key::ShiftRight => Some(ControlKey::RShift),
+            Key::ControlRight => Some(ControlKey::RControl),
+            Key::MetaRight => Some(ControlKey::RWin),
+            _ => None,
+        }
+
+    }
+
     pub fn event_lock_screen() -> KeyEvent {
         let mut key_event = KeyEvent::new();
         key_event.set_control_key(ControlKey::LockScreen);
@@ -214,17 +231,14 @@ static mut IS_0X021D_DOWN: bool = false;
 #[cfg(target_os = "macos")]
 static mut IS_LEFT_OPTION_DOWN: bool = false;
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 fn get_keyboard_mode() -> String {
     #[cfg(not(any(feature = "flutter", feature = "cli")))]
     if let Some(session) = CUR_SESSION.lock().unwrap().as_ref() {
         return session.get_keyboard_mode();
     }
     #[cfg(feature = "flutter")]
-    if let Some(session) = SESSIONS
-        .read()
-        .unwrap()
-        .get(&*CUR_SESSION_ID.read().unwrap())
-    {
+    if let Some(session) = flutter::get_cur_session() {
         return session.get_keyboard_mode();
     }
     "legacy".to_string()
@@ -358,7 +372,7 @@ pub fn get_keyboard_mode_enum(keyboard_mode: &str) -> KeyboardMode {
 }
 
 #[inline]
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
+#[cfg(not(any(target_os = "ios")))]
 pub fn is_modifier(key: &rdev::Key) -> bool {
     matches!(
         key,
@@ -579,11 +593,7 @@ pub fn send_key_event(key_event: &KeyEvent) {
         session.send_key_event(key_event);
     }
     #[cfg(feature = "flutter")]
-    if let Some(session) = SESSIONS
-        .read()
-        .unwrap()
-        .get(&*CUR_SESSION_ID.read().unwrap())
-    {
+    if let Some(session) = flutter::get_cur_session() {
         session.send_key_event(key_event);
     }
 }
@@ -594,11 +604,7 @@ pub fn get_peer_platform() -> String {
         return session.peer_platform();
     }
     #[cfg(feature = "flutter")]
-    if let Some(session) = SESSIONS
-        .read()
-        .unwrap()
-        .get(&*CUR_SESSION_ID.read().unwrap())
-    {
+    if let Some(session) = flutter::get_cur_session() {
         return session.peer_platform();
     }
     "Windows".to_string()
@@ -861,12 +867,14 @@ pub fn map_keyboard_mode(_peer: &str, event: &Event, mut key_event: KeyEvent) ->
                 rdev::win_scancode_to_macos_code(event.position_code)?
             }
         }
+        OS_LOWER_ANDROID => rdev::win_scancode_to_android_key_code(event.position_code)?,
         _ => rdev::win_scancode_to_linux_code(event.position_code)?,
     };
     #[cfg(target_os = "macos")]
     let keycode = match _peer {
         OS_LOWER_WINDOWS => rdev::macos_code_to_win_scancode(event.platform_code as _)?,
         OS_LOWER_MACOS => event.platform_code as _,
+        OS_LOWER_ANDROID => rdev::macos_code_to_android_key_code(event.platform_code as _)?,
         _ => rdev::macos_code_to_linux_code(event.platform_code as _)?,
     };
     #[cfg(target_os = "linux")]
@@ -879,6 +887,7 @@ pub fn map_keyboard_mode(_peer: &str, event: &Event, mut key_event: KeyEvent) ->
                 rdev::linux_code_to_macos_code(event.position_code as _)?
             }
         }
+        OS_LOWER_ANDROID => rdev::linux_code_to_android_key_code(event.position_code as _)?,
         _ => event.position_code as _,
     };
     #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -888,7 +897,7 @@ pub fn map_keyboard_mode(_peer: &str, event: &Event, mut key_event: KeyEvent) ->
     Some(key_event)
 }
 
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
+#[cfg(not(any(target_os = "ios")))]
 fn try_fill_unicode(_peer: &str, event: &Event, key_event: &KeyEvent, events: &mut Vec<KeyEvent>) {
     match &event.unicode {
         Some(unicode_info) => {
@@ -1057,12 +1066,14 @@ pub fn translate_keyboard_mode(peer: &str, event: &Event, key_event: KeyEvent) -
     events
 }
 
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
+#[cfg(not(any(target_os = "ios")))]
 pub fn keycode_to_rdev_key(keycode: u32) -> Key {
     #[cfg(target_os = "windows")]
     return rdev::win_key_from_scancode(keycode);
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux"))]
     return rdev::linux_key_from_code(keycode);
+    #[cfg(any(target_os = "android"))]
+    return rdev::android_key_from_code(keycode);
     #[cfg(target_os = "macos")]
     return rdev::macos_key_from_code(keycode.try_into().unwrap_or_default());
 }

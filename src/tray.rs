@@ -1,9 +1,12 @@
-use crate::{client::translate, ipc::Data};
-use hbb_common::{allow_err, log, tokio};
-use std::{
-    sync::{Arc, Mutex},
-    time::Duration,
-};
+use crate::client::translate;
+#[cfg(windows)]
+use crate::ipc::Data;
+#[cfg(windows)]
+use hbb_common::tokio;
+use hbb_common::{allow_err, log};
+use std::sync::{Arc, Mutex};
+#[cfg(windows)]
+use std::time::Duration;
 
 pub fn start_tray() {
     allow_err!(make_tray());
@@ -65,14 +68,14 @@ pub fn make_tray() -> hbb_common::ResultType<()> {
             )
         }
     };
-    let tray_icon = Some(
+    let _tray_icon = Some(
         TrayIconBuilder::new()
             .with_menu(Box::new(tray_menu))
             .with_tooltip(tooltip(0))
             .with_icon(icon)
             .build()?,
     );
-    let tray_icon = Arc::new(Mutex::new(tray_icon));
+    let _tray_icon = Arc::new(Mutex::new(_tray_icon));
 
     let menu_channel = MenuEvent::receiver();
     let tray_channel = TrayEvent::receiver();
@@ -149,7 +152,7 @@ pub fn make_tray() -> hbb_common::ResultType<()> {
         if let Ok(data) = ipc_receiver.try_recv() {
             match data {
                 Data::ControlledSessionCount(count) => {
-                    tray_icon
+                    _tray_icon
                         .lock()
                         .unwrap()
                         .as_mut()

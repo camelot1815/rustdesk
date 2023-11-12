@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hbb/common/widgets/peers_view.dart';
 import 'package:flutter_hbb/models/model.dart';
 import 'package:flutter_hbb/models/peer_model.dart';
-import 'package:flutter_hbb/models/peer_tab_model.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
 import 'package:get/get.dart';
 import 'package:bot_toast/bot_toast.dart';
@@ -24,6 +23,11 @@ bool shouldSortTags() {
   return bind.mainGetLocalOption(key: sortAbTagsOption).isNotEmpty;
 }
 
+final filterAbTagOption = 'filter-ab-by-intersection';
+bool filterAbTagByIntersection() {
+  return bind.mainGetLocalOption(key: filterAbTagOption).isNotEmpty;
+}
+
 class AbModel {
   final abLoading = false.obs;
   final pullError = "".obs;
@@ -32,6 +36,7 @@ class AbModel {
   final RxMap<String, int> tagColors = Map<String, int>.fromEntries([]).obs;
   final peers = List<Peer>.empty(growable: true).obs;
   final sortTags = shouldSortTags().obs;
+  final filterByIntersection = filterAbTagByIntersection().obs;
   final retrying = false.obs;
   bool get emtpy => peers.isEmpty && tags.isEmpty;
 
