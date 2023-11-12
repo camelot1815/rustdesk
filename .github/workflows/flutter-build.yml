@@ -684,7 +684,7 @@ jobs:
             ;;
             i686-linux-android)
               ls -l ./flutter/ndk_x86.sh
-              sudo chmod +x samplescript.sh
+              sudo chmod +x ./flutter/ndk_x86.sh
               ./flutter/ndk_x86.sh
               mkdir -p ./flutter/android/app/src/main/jniLibs/x86
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/x86/librustdesk.so
