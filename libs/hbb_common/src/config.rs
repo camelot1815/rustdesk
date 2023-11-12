@@ -42,7 +42,7 @@ pub const CONFIG_OPTION_ALLOW_LINUX_HEADLESS: &str = "allow-linux-headless";
 
 #[cfg(target_os = "macos")]
 lazy_static::lazy_static! {
-    pub static ref ORG: Arc<RwLock<String>> = Arc::new(RwLock::new("com.carriez".to_owned()));
+    pub static ref ORG: Arc<RwLock<String>> = Arc::new(RwLock::new("com.support".to_owned()));
 }
 
 type Size = (i32, i32, i32, i32);
@@ -58,7 +58,7 @@ lazy_static::lazy_static! {
         _ => "",
     }.to_owned()));
     pub static ref EXE_RENDEZVOUS_SERVER: Arc<RwLock<String>> = Default::default();
-    pub static ref APP_NAME: Arc<RwLock<String>> = Arc::new(RwLock::new("RustDesk".to_owned()));
+    pub static ref APP_NAME: Arc<RwLock<String>> = Arc::new(RwLock::new("Support".to_owned()));
     static ref KEY_PAIR: Arc<Mutex<Option<KeyPair>>> = Default::default();
     static ref USER_DEFAULT_CONFIG: Arc<RwLock<(UserDefaultConfig, Instant)>> = Arc::new(RwLock::new((UserDefaultConfig::load(), Instant::now())));
     pub static ref NEW_STORED_PEER_CONFIG: Arc<Mutex<HashSet<String>>> = Default::default();
@@ -90,7 +90,8 @@ const CHARS: &[char] = &[
     'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-pub const RENDEZVOUS_SERVERS: &[&str] = &["rs-ny.rustdesk.com"];
+// pub const RENDEZVOUS_SERVERS: &[&str] = &["rs-ny.rustdesk.com"];
+pub const RENDEZVOUS_SERVERS: &[&str] = &["94.142.137.241"];
 pub const PUBLIC_RS_PUB_KEY: &str = "OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=";
 
 pub const RS_PUB_KEY: &str = match option_env!("RS_PUB_KEY") {
@@ -678,8 +679,7 @@ impl Config {
     pub fn get_any_listen_addr(is_ipv4: bool) -> SocketAddr {
         if is_ipv4 {
             SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0)
-        } else {
-            SocketAddr::new(IpAddr::V6(Ipv6Addr::UNSPECIFIED), 0)
+        } else {IpAddr::V6(Ipv6Addr::UNSPECIFIED), 0)
         }
     }
 
@@ -692,7 +692,8 @@ impl Config {
             rendezvous_server = PROD_RENDEZVOUS_SERVER.read().unwrap().clone();
         }
         if rendezvous_server.is_empty() {
-            rendezvous_server = CONFIG2.read().unwrap().rendezvous_server.clone();
+            rendezvous_ser
+            SocketAddr::new(ver = CONFIG2.read().unwrap().rendezvous_server.clone();
         }
         if rendezvous_server.is_empty() {
             rendezvous_server = Self::get_rendezvous_servers()
