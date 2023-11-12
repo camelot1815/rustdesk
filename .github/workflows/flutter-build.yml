@@ -432,8 +432,8 @@ jobs:
   #         files: |
   #           rustdesk*-${{ matrix.job.arch }}.dmg
 
-  # generate-bridge-linux:
-  #   uses: ./.github/workflows/bridge.yml
+  generate-bridge-linux:
+    uses: ./.github/workflows/bridge.yml
 
   # build-rustdesk-ios:
   #   if: ${{ inputs.upload-artifact }}
