@@ -374,7 +374,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
               title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(translate('Keep RustDesk background service')),
+                    Text(translate('Keep Support background service')),
                     Text('* ${translate('Ignore Battery Optimizations')}',
                         style: Theme.of(context).textTheme.bodySmall),
                   ]),
@@ -407,7 +407,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
     enhancementsTiles.add(SettingsTile.switchTile(
         initialValue: _enableStartOnBoot,
         title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text("${translate('Start on boot')} (beta)"),
+          Text("${translate('Start on boot')} (бета)"),
           Text(
               '* ${translate('Start the screen sharing service on boot, requires special permissions')}',
               style: Theme.of(context).textTheme.bodySmall),
@@ -532,10 +532,10 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
                     await launchUrl(Uri.parse(url));
                   }
                 },
-                title: Text(translate("Version: ") + version),
+                title: Text("${translate("Version")}: $version"),
                 value: Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Text('rustdesk.com',
+                  child: Text('support.com',
                       style: TextStyle(
                         decoration: TextDecoration.underline,
                       )),

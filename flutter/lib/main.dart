@@ -311,6 +311,7 @@ void _runApp(
       darkTheme: MyTheme.darkTheme,
       themeMode: themeMode,
       home: home,
+      locale: Locale('ru'),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
