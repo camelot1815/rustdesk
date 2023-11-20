@@ -532,7 +532,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
                     await launchUrl(Uri.parse(url));
                   }
                 },
-                title: Text(translate("Version: ") + version),
+                title: Text('${translate("Version")}: $version'),
                 // value: Padding(
                 //   padding: EdgeInsets.symmetric(vertical: 8),
                 //   child: Text('rustdesk.com',
@@ -669,17 +669,17 @@ void showAbout(OverlayDialogManager dialogManager) {
     return CustomAlertDialog(
       title: Text('${translate('About')} Поддержка'),
       content: Wrap(direction: Axis.vertical, spacing: 12, children: [
-        Text('Version: $version'),
+        Text('${translate("Version")}: $version'),
         InkWell(
             onTap: () async {
-              const url = 'https://rustdesk.com/';
+              const url = 'https://support.com/';
               if (await canLaunchUrl(Uri.parse(url))) {
                 await launchUrl(Uri.parse(url));
               }
             },
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
-              child: Text('rustdesk.com',
+              child: Text('support.com',
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                   )),
