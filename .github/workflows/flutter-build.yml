@@ -11,7 +11,7 @@ on:
         default: "nightly_185"
 
 env:
-   CARGO_NDK_VERSION: "3.1.2"
+  CARGO_NDK_VERSION: "3.1.2"
   LLVM_VERSION: "15.0.6"
   FLUTTER_VERSION: "3.10.6"
   FLUTTER_RUST_BRIDGE_VERSION: "1.75.3"

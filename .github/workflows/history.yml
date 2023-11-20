@@ -3,7 +3,7 @@ name: Flutter Windows History Build
 on: [workflow_dispatch]
 
 env:
- LLVM_VERSION: "10.0"
+  LLVM_VERSION: "10.0"
   FLUTTER_VERSION: "3.10.6"
   TAG_NAME: "tmp"
   FLUTTER_RUST_BRIDGE_VERSION: "1.75.3"
