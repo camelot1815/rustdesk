@@ -115,6 +115,12 @@ Future<void> initEnv(String appType) async {
   _registerEventHandler();
   // Update the system theme.
   updateSystemWindowTheme();
+  String currentKey = bind.mainGetLocalOption(key: kCommConfKeyLang);
+  if (currentKey.isEmpty) {
+    await bind.mainSetLocalOption(key: kCommConfKeyLang, value: 'ru');
+    reloadAllWindows();
+    bind.mainChangeLanguage(lang: 'ru');
+  }
 }
 
 void runMainApp(bool startService) async {
@@ -423,7 +429,7 @@ class _AppState extends State<App> {
               ? (context, child) => AccessibilityListener(
                     child: MediaQuery(
                       data: MediaQuery.of(context).copyWith(
-                        textScaleFactor: 1.0,
+                        textScaler: TextScaler.linear(1.0),
                       ),
                       child: child ?? Container(),
                     ),
@@ -445,7 +451,7 @@ class _AppState extends State<App> {
 Widget _keepScaleBuilder(BuildContext context, Widget? child) {
   return MediaQuery(
     data: MediaQuery.of(context).copyWith(
-      textScaleFactor: 1.0,
+      textScaler: TextScaler.linear(1.0),
     ),
     child: child ?? Container(),
   );
