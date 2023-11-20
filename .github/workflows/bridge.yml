@@ -84,7 +84,7 @@ jobs:
           ~/.cargo/bin/flutter_rust_bridge_codegen --rust-input ./src/flutter_ffi.rs --dart-output ./flutter/lib/generated_bridge.dart
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@1.2.3-test
+        uses: actions/upload-artifact@master
         with:
           name: bridge-artifact
           path: |

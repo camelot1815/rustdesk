@@ -85,7 +85,7 @@ jobs:
                 ;;
             esac
       - name: Upload artifacts
-        uses: actions/upload-artifact@1.2.3-test
+        uses: actions/upload-artifact@master
         with:
           name: vcpkg-artifact-${{ matrix.job.arch }}
           path: |

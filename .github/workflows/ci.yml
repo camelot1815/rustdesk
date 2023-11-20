@@ -16,7 +16,7 @@ on:
       - "README.md"
   push:
     branches:
-      - 1.2.3-test
+      - master
     paths-ignore:
       - ".github/**"
       - "docs/**"

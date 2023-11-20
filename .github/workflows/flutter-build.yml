@@ -193,7 +193,7 @@ jobs:
   #       uses: actions/checkout@v3
 
   #     - name: Install LLVM and Clang
-  #       uses: rustdesk-org/install-llvm-action-32bit@1.2.3-test
+  #       uses: rustdesk-org/install-llvm-action-32bit@master
   #       with:
   #         version: ${{ env.LLVM_VERSION }}
 
@@ -230,7 +230,7 @@ jobs:
   #         cargo build --features inline --release --bins
   #         mkdir -p ./Release
   #         mv ./target/release/rustdesk.exe ./Release/rustdesk.exe
-  #         curl -LJ -o ./Release/sciter.dll https://github.com/c-smile/sciter-sdk/raw/1.2.3-test/bin.win/x32/sciter.dll
+  #         curl -LJ -o ./Release/sciter.dll https://github.com/c-smile/sciter-sdk/raw/master/bin.win/x32/sciter.dll
   #         echo "output_folder=./Release" >> $GITHUB_OUTPUT
 
   #     - name: find Runner.res
@@ -513,7 +513,7 @@ jobs:
 
   #     # - name: Upload Artifacts
   #     #   # if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
-  #     #   uses: actions/upload-artifact@1.2.3-test
+  #     #   uses: actions/upload-artifact@master
   #     #   with:
   #     #     name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
   #     #     path: flutter/build/ios/ipa/*.ipa
@@ -647,7 +647,7 @@ jobs:
         shell: bash
 
       - name: Restore bridge files
-        uses: actions/download-artifact@1.2.3-test
+        uses: actions/download-artifact@master
         with:
           name: bridge-artifact
           path: ./
@@ -764,7 +764,7 @@ jobs:
 
       - name: Upload Artifacts
         if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
-        uses: actions/upload-artifact@1.2.3-test
+        uses: actions/upload-artifact@master
         with:
           name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
           path: ${{steps.sign-rustdesk.outputs.signedReleaseFile}}
@@ -840,7 +840,7 @@ jobs:
   #       uses: actions/checkout@v3
 
   #     - name: Set Swap Space
-  #       uses: pierotofy/set-swap-space@1.2.3-test
+  #       uses: pierotofy/set-swap-space@master
   #       with:
   #         swap-size-gb: 12
 
@@ -868,7 +868,7 @@ jobs:
   #         sed -i  "s/\[\"cdylib\", \"staticlib\", \"rlib\"\]/\[\"cdylib\"\]/g" Cargo.toml
 
   #     - name: Restore bridge files
-  #       uses: actions/download-artifact@1.2.3-test
+  #       uses: actions/download-artifact@master
   #       with:
   #         name: bridge-artifact
   #         path: ./
@@ -972,7 +972,7 @@ jobs:
   #           esac
 
   #     - name: Upload Artifacts
-  #       uses: actions/upload-artifact@1.2.3-test
+  #       uses: actions/upload-artifact@master
   #       with:
   #         name: librustdesk-${{ matrix.job.arch }}-${{ matrix.job.extra-build-features }}.so
   #         path: target/release/liblibrustdesk.so
@@ -1052,7 +1052,7 @@ jobs:
   #       uses: actions/checkout@v3
 
   #     #- name: Set Swap Space
-  #     #  uses: pierotofy/set-swap-space@1.2.3-test
+  #     #  uses: pierotofy/set-swap-space@master
   #     #  with:
   #     #    swap-size-gb: 12
 
@@ -1080,7 +1080,7 @@ jobs:
   #         sed -i  "s/\[\"cdylib\", \"staticlib\", \"rlib\"\]/\[\"cdylib\"\]/g" Cargo.toml
 
   #     - name: Restore bridge files
-  #       uses: actions/download-artifact@1.2.3-test
+  #       uses: actions/download-artifact@master
   #       with:
   #         name: bridge-artifact
   #         path: ./
@@ -1184,7 +1184,7 @@ jobs:
   #           cargo build --lib --features flutter,flutter_texture_render,${{ matrix.job.extra-build-features }},$DEFAULT_FEAT --release
 
   #     - name: Upload Artifacts
-  #       uses: actions/upload-artifact@1.2.3-test
+  #       uses: actions/upload-artifact@master
   #       with:
   #         name: librustdesk-${{ matrix.job.arch }}-${{ matrix.job.extra-build-features }}.so
   #         path: target/release/liblibrustdesk.so
@@ -1247,7 +1247,7 @@ jobs:
   #       uses: actions/checkout@v3
 
   #     #- name: Set Swap Space
-  #     #  uses: pierotofy/set-swap-space@1.2.3-test
+  #     #  uses: pierotofy/set-swap-space@master
   #     #  with:
   #     #    swap-size-gb: 12
 
@@ -1362,7 +1362,7 @@ jobs:
   #           # package
   #           mkdir -p ./Release
   #           mv ./target/release/rustdesk ./Release/rustdesk
-  #           wget -O ./Release/libsciter-gtk.so https://github.com/c-smile/sciter-sdk/raw/1.2.3-test/bin.lnx/arm32/libsciter-gtk.so
+  #           wget -O ./Release/libsciter-gtk.so https://github.com/c-smile/sciter-sdk/raw/master/bin.lnx/arm32/libsciter-gtk.so
   #           ./build.py --package ./Release
 
   #     - name: Rename rustdesk
@@ -1383,7 +1383,7 @@ jobs:
   #           rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb
 
   #     - name: Upload Artifact
-  #       uses: actions/upload-artifact@1.2.3-test
+  #       uses: actions/upload-artifact@master
   #       if: ${{ contains(matrix.job.extra-build-features, 'flatpak') }}
   #       with:
   #         name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb
@@ -1427,7 +1427,7 @@ jobs:
   #       uses: actions/checkout@v3
 
   #     - name: Restore bridge files
-  #       uses: actions/download-artifact@1.2.3-test
+  #       uses: actions/download-artifact@master
   #       with:
   #         name: bridge-artifact
   #         path: ./
@@ -1446,7 +1446,7 @@ jobs:
   #         mkdir -p ./target/release/
 
   #     - name: Restore the rustdesk lib file
-  #       uses: actions/download-artifact@1.2.3-test
+  #       uses: actions/download-artifact@master
   #       with:
   #         name: librustdesk-${{ matrix.job.arch }}-${{ matrix.job.extra-build-features }}.so
   #         path: ./target/release/
@@ -1606,7 +1606,7 @@ jobs:
   #           ./appimage/rustdesk-${{ env.VERSION }}-*.AppImage
 
   #     - name: Upload Artifact
-  #       uses: actions/upload-artifact@1.2.3-test
+  #       uses: actions/upload-artifact@master
   #       if: ${{ contains(matrix.job.extra-build-features, 'flatpak') }}
   #       with:
   #         name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
@@ -1628,7 +1628,7 @@ jobs:
   #     # Temporary disable for there is no many archlinux arm hosts
   #     # - name: Build archlinux package
   #     #   if: ${{ matrix.job.extra-build-features == '' }}
-  #     #   uses: vufa/arch-makepkg-action@1.2.3-test
+  #     #   uses: vufa/arch-makepkg-action@master
   #     #   with:
   #     #     packages: >
   #     #       llvm
@@ -1713,7 +1713,7 @@ jobs:
   #       uses: actions/checkout@v3
 
   #     - name: Restore bridge files
-  #       uses: actions/download-artifact@1.2.3-test
+  #       uses: actions/download-artifact@master
   #       with:
   #         name: bridge-artifact
   #         path: ./
@@ -1732,7 +1732,7 @@ jobs:
   #         mkdir -p ./target/release/
 
   #     - name: Restore the rustdesk lib file
-  #       uses: actions/download-artifact@1.2.3-test
+  #       uses: actions/download-artifact@master
   #       with:
   #         name: librustdesk-${{ matrix.job.arch }}-${{ matrix.job.extra-build-features }}.so
   #         path: ./target/release/
@@ -1829,7 +1829,7 @@ jobs:
   #           rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
 
   #     - name: Upload Artifact
-  #       uses: actions/upload-artifact@1.2.3-test
+  #       uses: actions/upload-artifact@master
   #       if: ${{ contains(matrix.job.extra-build-features, 'flatpak') }}
   #       with:
   #         name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
@@ -1842,7 +1842,7 @@ jobs:
 
   #     - name: Build archlinux package
   #       if: ${{ matrix.job.extra-build-features == '' }}
-  #       uses: vufa/arch-makepkg-action@1.2.3-test
+  #       uses: vufa/arch-makepkg-action@master
   #       with:
   #         packages: >
   #           llvm
@@ -1936,7 +1936,7 @@ jobs:
   # #       uses: actions/checkout@v3
 
   # #     - name: Download Binary
-  # #       uses: actions/download-artifact@1.2.3-test
+  # #       uses: actions/download-artifact@master
   # #       with:
   # #         name: rustdesk-${{ env.VERSION }}-${{ matrix.job.target }}-${{ matrix.job.os }}.deb
   # #         path: .
@@ -2008,7 +2008,7 @@ jobs:
   #       uses: actions/checkout@v3
 
   #     - name: Download Binary
-  #       uses: actions/download-artifact@1.2.3-test
+  #       uses: actions/download-artifact@master
   #       with:
   #         name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.deb
   #         path: .
