@@ -669,22 +669,21 @@ void showAbout(OverlayDialogManager dialogManager) {
     return CustomAlertDialog(
       title: Text('${translate('About')} Поддержка'),
       content: Wrap(direction: Axis.vertical, spacing: 12, children: [
-        Text('Версия: $version'),
+        Text('Version: $version'),
         InkWell(
-          onTap: () async {
-            const url = 'https://support.com/';
-            if (await canLaunchUrl(Uri.parse(url))) {
-              await launchUrl(Uri.parse(url));
-            }
-          },
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text('support.com',
-                style: TextStyle(
-                  decoration: TextDecoration.underline,
-                )),
-          ),
-        ),
+            onTap: () async {
+              const url = 'https://rustdesk.com/';
+              if (await canLaunchUrl(Uri.parse(url))) {
+                await launchUrl(Uri.parse(url));
+              }
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('rustdesk.com',
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                  )),
+            )),
       ]),
       actions: [],
     );

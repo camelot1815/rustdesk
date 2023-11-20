@@ -1,6 +1,6 @@
 name: Build vcpkg dependencies for linux clients
 
-on:
+on: 
   workflow_call:
 
 jobs:
@@ -47,8 +47,8 @@ jobs:
                 tar -zxvf cmake-3.27.5.tar.gz
                 cd cmake-3.27.5
                 ./bootstrap
-                make
-                make install
+                make 
+                make install 
                 cd -
                 cmake --version
                 gcc -v
