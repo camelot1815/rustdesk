@@ -1,6 +1,6 @@
 name: Build vcpkg dependencies for linux clients
 
-on: 
+on:
   workflow_call:
 
 jobs:
@@ -47,8 +47,8 @@ jobs:
                 tar -zxvf cmake-3.27.5.tar.gz
                 cd cmake-3.27.5
                 ./bootstrap
-                make 
-                make install 
+                make
+                make install
                 cd -
                 cmake --version
                 gcc -v
@@ -85,7 +85,7 @@ jobs:
                 ;;
             esac
       - name: Upload artifacts
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@1.2.3-test
         with:
           name: vcpkg-artifact-${{ matrix.job.arch }}
           path: |

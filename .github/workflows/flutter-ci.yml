@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
   pull_request:
     paths-ignore:
-    - "docs/**"
-    - "README.md"
+      - "docs/**"
+      - "README.md"
   push:
     branches:
-      - master
+      - 1.2.3-test
     paths-ignore:
       - ".github/**"
       - "docs/**"
