@@ -371,7 +371,7 @@ class _FileManagerViewState extends State<FileManagerView> {
   final _globalHeaderKey = GlobalKey();
 
   /// [_lastClickTime], [_lastClickEntry] help to handle double click
-  var _lastClickTime =
+  num _lastClickTime =
       DateTime.now().millisecondsSinceEpoch - bind.getDoubleClickTime() - 1000;
   Entry? _lastClickEntry;
 
@@ -1126,11 +1126,14 @@ class _FileManagerViewState extends State<FileManagerView> {
 
   void _onSelectedChanged(SelectedItems selectedItems, List<Entry> entries,
       Entry entry, bool isLocal) {
-    final isCtrlDown = RawKeyboard.instance.keysPressed.contains(LogicalKeyboardKey.controlLeft) ||
-        RawKeyboard.instance.keysPressed.contains(LogicalKeyboardKey.controlRight);
-    final isShiftDown =
-        RawKeyboard.instance.keysPressed.contains(LogicalKeyboardKey.shiftLeft) ||
-        RawKeyboard.instance.keysPressed.contains(LogicalKeyboardKey.shiftRight);
+    final isCtrlDown = RawKeyboard.instance.keysPressed
+            .contains(LogicalKeyboardKey.controlLeft) ||
+        RawKeyboard.instance.keysPressed
+            .contains(LogicalKeyboardKey.controlRight);
+    final isShiftDown = RawKeyboard.instance.keysPressed
+            .contains(LogicalKeyboardKey.shiftLeft) ||
+        RawKeyboard.instance.keysPressed
+            .contains(LogicalKeyboardKey.shiftRight);
     if (isCtrlDown) {
       if (selectedItems.items.contains(entry)) {
         selectedItems.remove(entry);

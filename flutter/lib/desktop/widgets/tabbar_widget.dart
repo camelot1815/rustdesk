@@ -225,7 +225,7 @@ typedef TabMenuBuilder = Widget Function(String key);
 typedef LabelGetter = Rx<String> Function(String key);
 
 /// [_lastClickTime], help to handle double click
-int _lastClickTime =
+num _lastClickTime =
     DateTime.now().millisecondsSinceEpoch - bind.getDoubleClickTime() - 1000;
 
 // ignore: must_be_immutable
